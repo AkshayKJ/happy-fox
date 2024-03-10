@@ -26,4 +26,4 @@ process-emails:
 
 run-email-processor: init
 	@echo "Running email processor..."
-	source venv/bin/activate && python3 main.py
+	source venv/bin/activate && python3 __main__.py
