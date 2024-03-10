@@ -8,13 +8,25 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google.auth.transport.requests import Request
 from email_processor.models.emails import insert_email
+from typing import List, Dict, Any, Optional
 import email_processor.service.constants as constants
 
+# List to store email messages
 emails = []
 
 
-def get_messages(service, message_ids, user_id=constants.DEFAULT_GMAIL_USER_ID):
-    """Get email messages in batches."""
+def get_messages(
+    service: Any,
+    message_ids: List[str],
+    user_id: Optional[str]=constants.DEFAULT_GMAIL_USER_ID
+) -> None:
+    """
+    Get email messages in batches.
+    Parameters:
+        service: googleapiclient.discovery.Resource - Gmail API service object
+        message_ids: List[str] - list of email message IDs
+        user_id: str - user's email address
+    """
     for i in range(0, len(message_ids), 50):
         batch = service.new_batch_http_request(callback=callback)
         for message_id in message_ids[i:i+50]:
@@ -35,7 +47,7 @@ def callback(request_id, response, exception):
         emails.append(response)
 
 
-def get_service():
+def get_service() -> Any:
     """
     Shows basic usage of the Gmail API
     Returns authenticated Gmail API service
@@ -65,8 +77,13 @@ def get_service():
     return service
 
 
-def get_user_email(service, user_id=constants.DEFAULT_GMAIL_USER_ID):
-    """Get user's email address."""
+def get_user_email(service: Any, user_id: Optional[str]=constants.DEFAULT_GMAIL_USER_ID) -> str:
+    """
+    Get user's email address.
+    Parameters:
+        service: googleapiclient.discovery.Resource - Gmail API service object
+        user_id: str - user's email address
+    """
     try:
         user_info = service.users().getProfile(userId=user_id).execute()
         return user_info['emailAddress']
@@ -75,8 +92,13 @@ def get_user_email(service, user_id=constants.DEFAULT_GMAIL_USER_ID):
         raise error
 
 
-def list_messages(service, user_id=constants.DEFAULT_GMAIL_USER_ID):
-    """List all Messages of the user's mailbox, handling pagination."""
+def list_messages(service: Any, user_id: Optional[str]=constants.DEFAULT_GMAIL_USER_ID) -> List[str]:
+    """
+    List all Messages of the user's mailbox, handling pagination.
+    Parameters:
+        service: googleapiclient.discovery.Resource - Gmail API service object
+        user_id: str - user's email address
+    """
     try:
         next_page_token, messages = None, []
 
@@ -112,33 +134,45 @@ def list_messages(service, user_id=constants.DEFAULT_GMAIL_USER_ID):
         raise error
 
 
-def process_email_body(message_body_parts):
-    """Process email body."""
+def process_email_body(message_body_parts: List[Dict[str, Any]]) -> str:
+    """
+    Process email body.
+    Parameters:
+        message_body_parts: List[Dict[str, Any]] - list of email body parts
+    """
     message_body = []
     for part in message_body_parts:
         if part['mimeType'] == 'text/plain':
-            decoded_body = base64.urlsafe_b64decode(part['body']['data'] + '===').decode('utf-8', errors='ignore')
+            decoded_body = base64.urlsafe_b64decode(
+                part['body']['data'] + '===').decode('utf-8', errors='ignore')
             message_body.append(re.sub(r'\s+', ' ', decoded_body))
     return ", ".join(message_body)
 
 
-def insert_emails(to_email):
-    """Insert email messages into the database."""
+def insert_emails(to_email: str) -> None:
+    """
+    Insert email messages into the database.
+    Parameters:
+        to_email: str - email address of the recipient
+    """
     for message in emails:
         message_id = message['id']
         to_address = to_email
         body = process_email_body(message['payload']['parts'])
-        
+
         from_address = ", ".join(
-            [header['value'] for header in message['payload']['headers'] if header['name'] == 'From']
+            [header['value'] for header in message['payload']
+                ['headers'] if header['name'] == 'From']
         )
-        
+
         subject = ", ".join(
-            [header['value'] for header in message['payload']['headers'] if header['name'] == 'Subject']
+            [header['value'] for header in message['payload']
+                ['headers'] if header['name'] == 'Subject']
         )
-        
+
         received_date = email.utils.parsedate_to_datetime(
-            [header['value'] for header in message['payload']['headers'] if header['name'] == 'Date'][0]
+            [header['value'] for header in message['payload']
+                ['headers'] if header['name'] == 'Date'][0]
         )
 
         insert_email(
@@ -151,7 +185,7 @@ def insert_emails(to_email):
         )
 
 
-def fetch_emails():
+def fetch_emails() -> None:
     """Fetch emails from Gmail and insert them into the database."""
     service = get_service()
     user_email = get_user_email(service)

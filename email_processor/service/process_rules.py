@@ -1,5 +1,6 @@
 import json
 import requests
+from typing import Any, List, Optional
 from email_processor.models.constants import RULE_ACTION_MARK_AS_READ, RULE_ACTION_MOVE_TO_FOLDER
 from email_processor.models.emails import get_email_ids_for_rules
 from email_processor.models.rules import Rule
@@ -7,8 +8,12 @@ from email_processor.service.constants import DEFAULT_GMAIL_USER_ID, RULE_FILE_P
 from email_processor.service.fetch_emails import get_service
 
 
-def read_rules_from_json(file_path=RULE_FILE_PATH):
-    """Read rules from a JSON file."""
+def read_rules_from_json(file_path: Optional[str] = RULE_FILE_PATH) -> Rule:
+    """
+    Read rules from a JSON file.
+    Parameters:
+        file_path: str - path to the JSON file containing rules
+    """
     with open(file_path, 'r') as file:
         rules_data = json.load(file)
 
@@ -20,8 +25,13 @@ def read_rules_from_json(file_path=RULE_FILE_PATH):
         raise e
 
 
-def get_label_id(service, folder_name):
-    """Get label ID for the given folder name."""
+def get_label_id(service: Any, folder_name: str) -> Optional[str]:
+    """
+    Get label ID for the given folder name.
+    Parameters:
+        service: googleapiclient.discovery.Resource - Gmail API service object
+        folder_name: str - name of the folder
+    """
     try:
         labels = service.users().labels().list(userId='me').execute()
         for label in labels['labels']:
@@ -33,8 +43,20 @@ def get_label_id(service, folder_name):
         return None
 
 
-def perform_rule_actions(service, email_ids, rules, user_id=DEFAULT_GMAIL_USER_ID):
-    """Perform rule actions on emails using Gmail service for batch modification."""
+def perform_rule_actions(
+    service: Any,
+    email_ids: List[str],
+    rules: Rule,
+    user_id: Optional[str] = DEFAULT_GMAIL_USER_ID
+) -> None:
+    """
+    Perform rule actions on emails using Gmail service for batch modification.
+    Parameters:
+        service: googleapiclient.discovery.Resource - Gmail API service object
+        email_ids: list - list of email IDs
+        rules: Rule - rule object
+        user_id: str - user ID
+    """
     # Split email ids into batches
     batches = [email_ids[i:i + MODIFY_EMAILS_BATCH_SIZE]
                for i in range(0, len(email_ids), MODIFY_EMAILS_BATCH_SIZE)]
@@ -54,7 +76,8 @@ def perform_rule_actions(service, email_ids, rules, user_id=DEFAULT_GMAIL_USER_I
             else:
                 addLabelIds.append("UNREAD")
 
-    print(f"Performing rule actions: addLabelIds={addLabelIds}, removeLabelIds={removeLabelIds}")
+    print(
+        f"Performing rule actions: addLabelIds={addLabelIds}, removeLabelIds={removeLabelIds}")
 
     for batch in batches:
         # Perform batch modification using Gmail service
@@ -73,7 +96,7 @@ def perform_rule_actions(service, email_ids, rules, user_id=DEFAULT_GMAIL_USER_I
             raise error
 
 
-def process_emails_for_rule_actions():
+def process_emails_for_rule_actions() -> None:
     """Process emails for the given rule actions."""
     service, rules = get_service(), read_rules_from_json()
     email_ids = get_email_ids_for_rules(rules)
