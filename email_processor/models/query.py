@@ -54,6 +54,5 @@ def fetch_email_ids(db_session, email_table, rule):
         print(f"An error occurred while reading emails from db: {e}")
     finally:
         db_session.close()
-        print(email_ids)
         return email_ids
 

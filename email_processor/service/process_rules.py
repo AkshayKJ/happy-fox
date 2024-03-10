@@ -54,6 +54,8 @@ def perform_rule_actions(service, email_ids, rules, user_id=DEFAULT_GMAIL_USER_I
             else:
                 addLabelIds.append("UNREAD")
 
+    print(f"Performing rule actions: addLabelIds={addLabelIds}, removeLabelIds={removeLabelIds}")
+
     for batch in batches:
         # Perform batch modification using Gmail service
         batch_request = {
@@ -61,7 +63,6 @@ def perform_rule_actions(service, email_ids, rules, user_id=DEFAULT_GMAIL_USER_I
             "addLabelIds": addLabelIds,
             "removeLabelIds": removeLabelIds
         }
-        print(batch_request)
         try:
             service.users().messages().batchModify(
                 userId=user_id, body=batch_request).execute()

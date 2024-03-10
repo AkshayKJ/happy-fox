@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from email_processor.models.constants import DATABASE_URL
+from email_processor.models.constants import DATABASE_URL, SQLALCHEMY_ECHO_MODE
 from email_processor.models.query import fetch_email_ids
 
 
@@ -22,7 +22,7 @@ class EmailMessage(BASE):
 
 
 
-DB_ENGINE = create_engine(DATABASE_URL, echo=True)
+DB_ENGINE = create_engine(DATABASE_URL, echo=SQLALCHEMY_ECHO_MODE)
 DB_SESSION = sessionmaker(bind=DB_ENGINE)
 
 

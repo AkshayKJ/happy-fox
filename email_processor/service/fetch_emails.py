@@ -103,8 +103,6 @@ def list_messages(service, user_id=constants.DEFAULT_GMAIL_USER_ID):
             print("No messages found.")
         else:
             print(f"Total messages fetched: {len(messages)}")
-            for message in messages:
-                print(f"Message ID: {message}")
 
         messages = [message['id'] for message in messages]
         return messages

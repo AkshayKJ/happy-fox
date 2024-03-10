@@ -1,4 +1,15 @@
 # Replace the connection string with your actual database credentials
+import os
+
+
+SQLALCHEMY_ECHO_MODE = os.getenv("SQLALCHEMY_ECHO_MODE")
+if SQLALCHEMY_ECHO_MODE == "True":
+    SQLALCHEMY_ECHO_MODE = True
+elif SQLALCHEMY_ECHO_MODE == "debug":
+    SQLALCHEMY_ECHO_MODE = "debug"
+else:
+    SQLALCHEMY_ECHO_MODE = False
+
 DATABASE_URL = "sqlite:///email.db"
 DATETIME_FORMAT = '%d-%m-%Y'
 RULE_ACTION_MOVE_TO_FOLDER = "move_to_folder"

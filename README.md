@@ -28,10 +28,10 @@ This project is a Python-based application designed to interact with the Gmail A
 ## Usage
 
 - Make use of available make tasks to run the scripts:
-    1. Local Sqlalchemy DB Creation: `make create-db`
+    1. Local Sqlalchemy DB Creation: `make create-db`. Utilize `SQLALCHEMY_ECHO_MODE` env var to set sqlalchemy logging level (True, False, debug).
     2. Fetch all emails: `make fetch-emails`. Note that `email_processor/service/constants.py` contains constants for configuring Gmail List Emails API desired size and pagination size.
     3. Process emails based on `rules.json`: `make fetch-emails`. Note that `email_processor/service/constants.py` contains constants for configuring Gmail Modify Email Labels API batch size.
-    4. Run all of the above steps in a single task: `make run-email-processor`
+    4. Run all of the above steps in a single task: `make run-email-processor`.
 
 #### Note: Refer and utilize constants files for configurations
 
