@@ -24,7 +24,6 @@ process-emails:
 	@echo "Processing emails based on rules..."
 	source venv/bin/activate && python3 email_processor/service/process_rules.py
 
-echo-run-email-processor:
+run-email-processor: init
 	@echo "Running email processor..."
-
-run-email-processor: echo-run-email-processor init create-db fetch-emails process-emails
+	source venv/bin/activate && python3 main.py
