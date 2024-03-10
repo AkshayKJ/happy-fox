@@ -1,3 +1,7 @@
 env/
 .env
 *.pyc
+credentials.json
+__pycache__
+*.db
+*.pickle

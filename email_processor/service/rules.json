@@ -1,0 +1,19 @@
+{
+    "collection_predicate": "All",
+    "conditions": [
+        {
+            "field": "from_address",
+            "predicate": "contains",
+            "value": "bytebytego@substack.com"
+        },
+        {
+            "field": "received_date",
+            "predicate": "gt",
+            "value": "08-03-2024"
+        }
+    ],
+    "actions": {
+        "mark_as_read": false,
+        "move_to_folder": "INBOX"
+    }
+}
