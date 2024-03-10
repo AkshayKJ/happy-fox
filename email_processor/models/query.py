@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 from typing import Any, List
 from email_processor.models.constants import *
 from email_processor.models.rules import Rule
@@ -70,7 +71,7 @@ def fetch_email_ids(db_session: Any, email_table: Any, rule: Rule) -> List[str]:
                 email_ids.extend([email.message_id for email in query.all()])
 
     except Exception as e:
-        print(f"An error occurred while reading emails from db: {e}")
+        logging.error(f"An error occurred while reading emails from db: {e}")
     finally:
         db_session.close()
         return email_ids

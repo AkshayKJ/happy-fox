@@ -1,4 +1,5 @@
 import json
+import logging
 import requests
 from typing import Any, List, Optional
 from email_processor.models.constants import RULE_ACTION_MARK_AS_READ, RULE_ACTION_MOVE_TO_FOLDER
@@ -21,7 +22,7 @@ def read_rules_from_json(file_path: Optional[str] = RULE_FILE_PATH) -> Rule:
         rules = Rule.from_dict(rules_data)
         return rules
     except ValueError as e:
-        print(f"Error processing rules: {str(e)}")
+        logging.error(f"Error processing rules: {str(e)}")
         raise e
 
 
@@ -39,7 +40,7 @@ def get_label_id(service: Any, folder_name: str) -> Optional[str]:
                 return label['id']
         return None
     except Exception as e:
-        print(f"Error getting label ID for folder: {str(e)}")
+        logging.error(f"Error getting label ID for folder: {str(e)}")
         return None
 
 
@@ -76,7 +77,7 @@ def perform_rule_actions(
             else:
                 addLabelIds.append("UNREAD")
 
-    print(
+    logging.info(
         f"Performing rule actions: addLabelIds={addLabelIds}, removeLabelIds={removeLabelIds}")
 
     for batch in batches:
@@ -89,9 +90,9 @@ def perform_rule_actions(
         try:
             service.users().messages().batchModify(
                 userId=user_id, body=batch_request).execute()
-            print(f"Rule actions performed successfully for batch: {batch}")
+            logging.info(f"Rule actions performed successfully for batch: {batch}")
         except requests.HTTPError as error:
-            print(
+            logging.error(
                 f'Error occured while performing email actions in batches: {error}')
             raise error
 

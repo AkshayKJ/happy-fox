@@ -1,5 +1,6 @@
 import base64
 import email.utils
+import logging
 import os.path
 import pickle
 import re
@@ -35,14 +36,14 @@ def get_messages(
         try:
             batch.execute()
         except HttpError as error:
-            print(
+            logging.error(
                 f'Error occured while requesting email messages in batches: {error}')
             raise error
 
 
 def callback(request_id, response, exception):
     if exception is not None:
-        print(f'Error occured while processing batch request: {exception}')
+        logging.error(f'Error occured while processing batch request: {exception}')
     else:
         emails.append(response)
 
@@ -88,7 +89,7 @@ def get_user_email(service: Any, user_id: Optional[str]=constants.DEFAULT_GMAIL_
         user_info = service.users().getProfile(userId=user_id).execute()
         return user_info['emailAddress']
     except HttpError as error:
-        print(f"Error occured fetching user's email address: {error}")
+        logging.error(f"Error occured fetching user's email address: {error}")
         raise error
 
 
@@ -114,7 +115,6 @@ def list_messages(service: Any, user_id: Optional[str]=constants.DEFAULT_GMAIL_U
                 maxResults=maxResultSize,
                 includeSpamTrash=constants.LIST_EMAILS_INCLUDE_SPAM_TRASH_EMAILS
             ).execute()
-            print(response)
             messages.extend(response.get('messages', []))
 
             next_page_token = response.get('nextPageToken')
@@ -122,15 +122,15 @@ def list_messages(service: Any, user_id: Optional[str]=constants.DEFAULT_GMAIL_U
                 break
 
         if not messages:
-            print("No messages found.")
+            logging.info("No messages found.")
         else:
-            print(f"Total messages fetched: {len(messages)}")
+            logging.info(f"Total messages fetched: {len(messages)}")
 
         messages = [message['id'] for message in messages]
         return messages
 
     except HttpError as error:
-        print(f'An error occurred while fetching emails: {error}')
+        logging.error(f'An error occurred while fetching emails: {error}')
         raise error
 
 

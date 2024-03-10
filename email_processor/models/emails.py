@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Text
 from sqlalchemy.ext.declarative import declarative_base
@@ -51,7 +52,7 @@ def insert_email(message_id: str, from_address: str, to_address: str, subject: s
     try:
         session.commit()
     except Exception as e:
-        print(f"An error occurred while inserting emails in db: {e}")
+        logging.error(f"An error occurred while inserting emails in db: {e}")
         session.rollback()
     finally:
         session.close()
