@@ -134,19 +134,24 @@ def list_messages(service: Any, user_id: Optional[str]=constants.DEFAULT_GMAIL_U
         raise error
 
 
-def process_email_body(message_body_parts: List[Dict[str, Any]]) -> str:
+def process_email_body(message: Dict[str, Any]) -> str:
     """
     Process email body.
+    If multiple parts present, process text parts only.
+    Else process the snippet.
     Parameters:
-        message_body_parts: List[Dict[str, Any]] - list of email body parts
+        message: Dict[str, Any] - list of email body parts
     """
-    message_body = []
-    for part in message_body_parts:
-        if part['mimeType'] == 'text/plain':
-            decoded_body = base64.urlsafe_b64decode(
-                part['body']['data'] + '===').decode('utf-8', errors='ignore')
-            message_body.append(re.sub(r'\s+', ' ', decoded_body))
-    return ", ".join(message_body)
+    if 'parts' in message['payload']:
+        message_body = []
+        for part in message['payload']['parts']:
+            if part['mimeType'] == 'text/plain':
+                decoded_body = base64.urlsafe_b64decode(
+                    part['body']['data'] + '===').decode('utf-8', errors='ignore')
+                message_body.append(re.sub(r'\s+', ' ', decoded_body))
+        return ", ".join(message_body)
+    else:
+        return message['snippet']
 
 
 def insert_emails(to_email: str) -> None:
@@ -158,7 +163,7 @@ def insert_emails(to_email: str) -> None:
     for message in emails:
         message_id = message['id']
         to_address = to_email
-        body = process_email_body(message['payload']['parts'])
+        body = process_email_body(message)
 
         from_address = ", ".join(
             [header['value'] for header in message['payload']
